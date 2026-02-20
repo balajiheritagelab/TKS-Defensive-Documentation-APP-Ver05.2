@@ -1,7 +1,6 @@
 let currentStep = 1;
 let record = {};
 let processSteps = [];
-let mapInstance = null;
 
 /* ---------- NAVIGATION ---------- */
 
@@ -38,6 +37,8 @@ function startNew() {
   captureGeo();
   renderStep();
 }
+
+/* ---------- GEO ---------- */
 
 function captureGeo() {
   if (navigator.geolocation) {
@@ -124,6 +125,8 @@ function renderStep() {
   }
 }
 
+/* ---------- NEXT / BACK ---------- */
+
 function nextStep() {
 
   if (currentStep === 1) {
@@ -170,134 +173,4 @@ function prevStep() {
     currentStep--;
     renderStep();
   }
-}
-
-/* ---------- PROCESS STEPS ---------- */
-
-function addProcessStep() {
-  const desc = document.getElementById("step_desc").value;
-  const file = document.getElementById("step_img").files[0];
-
-  if (!desc || !file) return;
-
-  compressImage(file, base64 => {
-    processSteps.push({
-      step_no: processSteps.length + 1,
-      description: desc,
-      image: base64
-    });
-    renderProcessList();
-  });
-}
-
-function renderProcessList() {
-  const list = document.getElementById("step-list");
-  if (!list) return;
-
-  list.innerHTML = processSteps.map(s => `
-    <div>
-      <strong>Step ${s.step_no}</strong>
-      <p>${s.description}</p>
-      <img src="${s.image}" width="100"/>
-      <hr/>
-    </div>
-  `).join("");
-}
-
-/* ---------- SIGNATURE (TOUCH SAFE) ---------- */
-
-function initSignature() {
-  const canvas = document.getElementById("signature");
-  const ctx = canvas.getContext("2d");
-  let drawing = false;
-
-  function start(e) {
-    drawing = true;
-    draw(e);
-  }
-
-  function end() {
-    drawing = false;
-    ctx.beginPath();
-  }
-
-  function draw(e) {
-    if (!drawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  }
-
-  canvas.addEventListener("mousedown", start);
-  canvas.addEventListener("mouseup", end);
-  canvas.addEventListener("mousemove", draw);
-  canvas.addEventListener("touchstart", start);
-  canvas.addEventListener("touchend", end);
-  canvas.addEventListener("touchmove", draw);
-}
-
-function clearSignature() {
-  const canvas = document.getElementById("signature");
-  canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
-}
-
-/* ---------- SAVE ---------- */
-
-async function finalizeRecord() {
-  if (!record.craft.name) {
-    alert("Craft name required.");
-    return;
-  }
-
-  record.last_modified = new Date().toISOString();
-  record.record_hash = await hashObject(record);
-
-  saveRecord(record);
-  alert("Record saved successfully.");
-  goHome();
-}
-
-/* ---------- RECORD VIEW ---------- */
-
-function viewRecords() {
-  hideAll();
-  document.getElementById("records-section").classList.remove("hidden");
-
-  getAllRecords(records => {
-    const container = document.getElementById("records-list");
-    container.innerHTML = "";
-
-    if (!records.length) {
-      container.innerHTML = "<p>No saved records.</p>";
-      return;
-    }
-
-    records.forEach(r => {
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <strong>${r.craft.name}</strong><br/>
-        ${r.created_at}<br/>
-        <button onclick='exportRecord(${JSON.stringify(r)})'>JSON</button>
-        <button onclick='exportPDF(${JSON.stringify(r)})'>PDF</button>
-        <button onclick="deleteRecord('${r.uuid}')">Delete</button>
-        <hr/>
-      `;
-      container.appendChild(div);
-    });
-  });
-}
-
-function deleteRecord(uuid) {
-  const tx = db.transaction(["records"], "readwrite");
-  tx.objectStore("records").delete(uuid);
-  tx.oncomplete = viewRecords;
 }
