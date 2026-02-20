@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TKS Defensive Documentation</title>
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2e3a59">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+</head>
+<body>
+
+<header>
+  <h1>TKS Defensive Documentation</h1>
+</header>
+
+<main id="app">
+
+  <div id="home">
+    <button onclick="startNew()">➕ New Documentation</button>
+    <button onclick="viewRecords()">📁 View Saved Records</button>
+    <button onclick="openMap()">🗺 View Map</button>
+  </div>
+
+  <div id="form-section" class="hidden">
+    <div id="step-indicator"></div>
+    <div id="step-content"></div>
+    <div class="nav-buttons">
+      <button onclick="prevStep()">Back</button>
+      <button onclick="nextStep()">Next</button>
+    </div>
+  </div>
+
+  <div id="records-section" class="hidden">
+    <h2>Saved Records</h2>
+    <div id="records-list"></div>
+    <button onclick="goHome()">Back</button>
+  </div>
+
+  <div id="map-section" class="hidden">
+    <h2>Craft Map View</h2>
+    <div id="map"></div>
+    <button onclick="goHome()">Back</button>
+  </div>
+
+</main>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="js/db.js"></script>
+<script src="js/crypto.js"></script>
+<script src="js/media.js"></script>
+<script src="js/export-json.js"></script>
+<script src="js/export-pdf.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+</body>
+</html>
